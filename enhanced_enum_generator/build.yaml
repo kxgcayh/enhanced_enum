@@ -1,0 +1,8 @@
+builders:
+  enhanced_enums:
+    import: "package:enhanced_enum_generator/builder.dart"
+    builder_factories: ["enumBuilder"]
+    build_extensions: { ".dart": [".g.part"] }
+    auto_apply: root_package
+    build_to: cache
+    applies_builders: ["source_gen|combining_builder"]
