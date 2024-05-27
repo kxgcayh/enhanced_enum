@@ -1,9 +1,10 @@
 name: enhanced_enum_generator
 description: Code generator for enhanced_enum
-version: 0.2.4
+version: 0.2.5
 homepage: https://famedly.com
 repository: https://gitlab.com/famedly/company/frontend/libraries/enhanced_enum/
 issues: https://gitlab.com/famedly/company/frontend/libraries/enhanced_enum/-/issues
+publish_to: 'none'
 
 environment:
   sdk: '>=2.14.0 <3.0.0'
@@ -13,7 +14,10 @@ dependencies:
   analyzer: ^6.4.1
   build: ^2.1.1
   build_runner: ^2.1.4
-  enhanced_enum: ^0.2.2
+  enhanced_enum:
+    git:
+      url: https://github.com/kxgcayh/enhanced_enum
+      path: enhanced_enum
   source_gen: ^1.1.1
 
 dev_dependencies:

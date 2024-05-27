@@ -1,6 +1,6 @@
 name: enhanced_enum
 description: Add fancy methods to your enums
-version: 0.2.4
+version: 0.2.5
 homepage: https://famedly.com
 repository: https://gitlab.com/famedly/company/frontend/libraries/enhanced_enum/
 issues: https://gitlab.com/famedly/company/frontend/libraries/enhanced_enum/-/issues
