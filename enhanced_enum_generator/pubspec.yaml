@@ -18,6 +18,7 @@ dependencies:
     git:
       url: https://github.com/kxgcayh/enhanced_enum
       path: enhanced_enum
+      ref: development
   source_gen: ^2.0.0
 
 dev_dependencies:
