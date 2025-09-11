@@ -1,22 +1,21 @@
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/element2.dart';
 import 'package:enhanced_enum/enhanced_enum.dart';
 import 'package:source_gen/source_gen.dart';
 
 class EnumExtensionGenerator {
-  final EnumElement element;
+  final EnumElement2 element;
   final ConstantReader annotation;
   final EnhancedEnum config;
   final buff = StringBuffer();
 
   static String camelToUnder(String s, {bool lower = true}) {
-    final ret = s.replaceAllMapped(
-        RegExp(r'([a-z])([A-Z])'), (m) => '${m.group(1)!}_${m.group(2)!}');
+    final ret = s.replaceAllMapped(RegExp(r'([a-z])([A-Z])'), (m) => '${m.group(1)!}_${m.group(2)!}');
     return lower ? ret.toLowerCase() : ret.toUpperCase();
   }
 
   static String underToCamel(String s, {bool lower = true}) {
-    final ret = s.toLowerCase().replaceAllMapped(
-        RegExp(r'(\w)_(\w)'), (m) => m.group(1)! + m.group(2)!.toUpperCase());
+    final ret = s.toLowerCase().replaceAllMapped(RegExp(r'(\w)_(\w)'), (m) => m.group(1)! + m.group(2)!.toUpperCase());
     return lower ? ret : castFirstUpper(ret);
   }
 
@@ -25,19 +24,17 @@ class EnumExtensionGenerator {
   static String castFirstLower(String s) => s[0].toLowerCase() + s.substring(1);
 
   String get name => element.displayName;
-  Iterable<FieldElement> get values => element.fields
-      .where((f) => f.type.getDisplayString(withNullability: true) == name);
-  Iterable<EnhancedEnumValue?> get valueConfigs => values
-      .map((v) => v.metadata.cast<ElementAnnotation?>().firstWhere(
-          (m) => m?.element?.displayName == 'EnhancedEnumValue',
-          orElse: () => null))
-      .map((v) => v == null
-          ? null
-          : EnhancedEnumValue(
-              name: v.computeConstantValue()?.getField('name')?.toStringValue(),
-            ));
-  Map<String, EnhancedEnumValue?> get valueConfigsMap =>
-      Map.fromIterables(valueNames, valueConfigs);
+
+  Iterable<FieldElement2> get values {
+    return element.fields2.where((f) => f.type.getDisplayString(withNullability: true) == name);
+  }
+
+  Iterable<EnhancedEnumValue?> get valueConfigs => values.map((v) {
+        return v.metadata2.annotations.firstWhere((m) => m.element2?.displayName == 'EnhancedEnumValue');
+      }).map((v) => EnhancedEnumValue(
+            name: v.computeConstantValue()?.getField('name')?.toStringValue(),
+          ));
+  Map<String, EnhancedEnumValue?> get valueConfigsMap => Map.fromIterables(valueNames, valueConfigs);
   Iterable<String> get valueNames => values.map((v) => v.displayName);
 
   String getStringValue(String n) {
@@ -51,9 +48,7 @@ class EnumExtensionGenerator {
       case EnhancedEnumNamingConvention.camelCase:
         return n.contains('_') ? underToCamel(n) : castFirstLower(n);
       case EnhancedEnumNamingConvention.upperCamelCase:
-        return n.contains('_')
-            ? underToCamel(n, lower: false)
-            : castFirstUpper(n);
+        return n.contains('_') ? underToCamel(n, lower: false) : castFirstUpper(n);
       case EnhancedEnumNamingConvention.snakeCase:
         return camelToUnder(n);
       case EnhancedEnumNamingConvention.screamingSnakeCase:
@@ -64,14 +59,9 @@ class EnumExtensionGenerator {
   EnumExtensionGenerator(this.element, this.annotation)
       : assert(element.kind == ElementKind.ENUM),
         config = EnhancedEnum(
-          namingConvention: EnhancedEnumNamingConvention.values[annotation
-                  .objectValue
-                  .getField('namingConvention')
-                  ?.getField('index')
-                  ?.toIntValue() ??
-              0],
-          strict: annotation.objectValue.getField('strict')?.toBoolValue() ??
-              EnhancedEnum().strict,
+          namingConvention: EnhancedEnumNamingConvention
+              .values[annotation.objectValue.getField('namingConvention')?.getField('index')?.toIntValue() ?? 0],
+          strict: annotation.objectValue.getField('strict')?.toBoolValue() ?? EnhancedEnum().strict,
           prefixes: annotation.objectValue.getField('prefixes')?.toListValue(),
         );
 
@@ -96,19 +86,16 @@ class EnumExtensionGenerator {
         if (config.prefixes != null) {
           for (final prefix in config.prefixes!) {
             if (entry.value?.name != null) {
-              buff.writeln(
-                  '    \'${prefix.toStringValue()}${entry.value!.name}\': $name.${entry.key},');
+              buff.writeln('    \'${prefix.toStringValue()}${entry.value!.name}\': $name.${entry.key},');
             } else if (config.strict) {
-              buff.writeln(
-                  '    \'${prefix.toStringValue()}${getStringValue(entry.key)}\': $name.${entry.key},');
+              buff.writeln('    \'${prefix.toStringValue()}${getStringValue(entry.key)}\': $name.${entry.key},');
             }
           }
         } else {
           if (entry.value?.name != null) {
             buff.writeln('    \'${entry.value!.name}\': $name.${entry.key},');
           } else if (config.strict) {
-            buff.writeln(
-                '    \'${getStringValue(entry.key)}\': $name.${entry.key},');
+            buff.writeln('    \'${getStringValue(entry.key)}\': $name.${entry.key},');
           }
         }
       }
@@ -125,11 +112,9 @@ class EnumExtensionGenerator {
       buff.writeln('    return override;');
       buff.writeln('  }');
     }
-    buff.writeln(
-        '  final cmpval = val.replaceAll(\'$name.\', \'\').replaceAll(\'_\', \'\').toLowerCase();');
+    buff.writeln('  final cmpval = val.replaceAll(\'$name.\', \'\').replaceAll(\'_\', \'\').toLowerCase();');
     buff.writeln('  return cast<$name?>().firstWhere((v) =>');
-    buff.writeln(
-        '    v.toString().replaceAll(\'$name.\', \'\').replaceAll(\'_\', \'\').toLowerCase() == cmpval');
+    buff.writeln('    v.toString().replaceAll(\'$name.\', \'\').replaceAll(\'_\', \'\').toLowerCase() == cmpval');
     buff.writeln('  , orElse: () => null);');
     buff.writeln('}');
     buff.writeln('}');
@@ -147,8 +132,7 @@ class EnumExtensionGenerator {
 
   void generateIsMethods() {
     for (final n in valueNames) {
-      buff.writeln(
-          'bool get is${n[0].toUpperCase()}${n.substring(1)} => this == $name.$n;');
+      buff.writeln('bool get is${n[0].toUpperCase()}${n.substring(1)} => this == $name.$n;');
     }
   }
 
