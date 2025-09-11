@@ -25,15 +25,22 @@ class EnumExtensionGenerator {
 
   String get name => element.displayName;
 
-  Iterable<FieldElement2> get values {
-    return element.fields2.where((f) => f.type.getDisplayString(withNullability: true) == name);
+  Iterable<FieldElement> get values {
+    return element.fields.where((f) => f.type.getDisplayString(withNullability: true) == name);
   }
 
-  Iterable<EnhancedEnumValue?> get valueConfigs => values.map((v) {
-        return v.metadata2.annotations.firstWhere((m) => m.element2?.displayName == 'EnhancedEnumValue');
-      }).map((v) => EnhancedEnumValue(
-            name: v.computeConstantValue()?.getField('name')?.toStringValue(),
-          ));
+  Iterable<EnhancedEnumValue?> get valueConfigs {
+    return values.map((v) {
+      ElementAnnotation? element;
+      for (final metadata in v.metadata.annotations) {
+        final displayName = metadata.element?.displayName;
+        if (displayName == 'EnhancedEnumValue') element = metadata;
+      }
+      return element;
+    }).map((ElementAnnotation? v) =>
+        EnhancedEnumValue(name: v?.computeConstantValue()?.getField('name')?.toStringValue()));
+  }
+
   Map<String, EnhancedEnumValue?> get valueConfigsMap => Map.fromIterables(valueNames, valueConfigs);
   Iterable<String> get valueNames => values.map((v) => v.displayName);
 
