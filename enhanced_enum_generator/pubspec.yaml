@@ -11,9 +11,9 @@ environment:
 
 
 dependencies:
-  analyzer: ^8.1.1
+  analyzer: ^8.0.0
   build: ^4.0.0
-  build_runner: ^2.1.4
+  build_runner: ^2.8.0
   enhanced_enum:
     git:
       url: https://github.com/kxgcayh/enhanced_enum
