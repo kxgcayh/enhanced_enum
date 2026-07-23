@@ -1,10 +1,9 @@
 import 'package:analyzer/dart/element/element.dart';
-import 'package:analyzer/dart/element/element2.dart';
 import 'package:enhanced_enum/enhanced_enum.dart';
 import 'package:source_gen/source_gen.dart';
 
 class EnumExtensionGenerator {
-  final EnumElement2 element;
+  final EnumElement element;
   final ConstantReader annotation;
   final EnhancedEnum config;
   final buff = StringBuffer();
@@ -25,15 +24,15 @@ class EnumExtensionGenerator {
 
   String get name => element.displayName;
 
-  Iterable<FieldElement2> get values {
-    return element.fields2.where((f) => f.type.getDisplayString(withNullability: true) == name);
+  Iterable<FieldElement> get values {
+    return element.fields.where((f) => f.type.getDisplayString() == name);
   }
 
   Iterable<EnhancedEnumValue?> get valueConfigs {
     return values.map((v) {
       ElementAnnotation? element;
-      for (final metadata in v.metadata2.annotations) {
-        final displayName = metadata.element2?.displayName;
+      for (final metadata in v.metadata.annotations) {
+        final displayName = metadata.element?.displayName;
         if (displayName == 'EnhancedEnumValue') element = metadata;
       }
       return element;
